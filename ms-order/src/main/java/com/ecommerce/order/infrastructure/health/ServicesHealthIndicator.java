@@ -62,20 +62,28 @@ public class ServicesHealthIndicator implements HealthIndicator {
                 .build();
     }
 
+    /**
+     * Vérifie la disponibilité du service User via son endpoint /actuator/health.
+     * 
+     * @return true si le service User est accessible, false sinon
+     */
     private boolean checkUserService() {
         try {
-            userClient.getUserById(1L);
-            return true;
+            return userClient.isServiceAvailable();
         } catch (Exception e) {
             log.warn("User service health check failed: {}", e.getMessage());
             return false;
         }
     }
 
+    /**
+     * Vérifie la disponibilité du service Product via son endpoint /actuator/health.
+     * 
+     * @return true si le service Product est accessible, false sinon
+     */
     private boolean checkProductService() {
         try {
-            productClient.getProductById(1L);
-            return true;
+            return productClient.isServiceAvailable();
         } catch (Exception e) {
             log.warn("Product service health check failed: {}", e.getMessage());
             return false;
