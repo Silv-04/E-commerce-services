@@ -11,7 +11,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Entité représentant une commande.
+ * Entité JPA représentant une commande dans le système e-commerce.
+ * 
+ * <p>Une commande est associée à un utilisateur et contient plusieurs articles (OrderItem).
+ * Elle possède un statut qui évolue au cours de son cycle de vie :
+ * PENDING → CONFIRMED → SHIPPED → DELIVERED ou CANCELLED.</p>
+ * 
+ * <p>Relation : OneToMany avec OrderItem (une commande contient plusieurs articles)</p>
+ * 
+ * @author E-commerce Team
+ * @version 1.0
+ * @since 2024-12
+ * @see OrderItem
+ * @see OrderStatus
  */
 @Entity
 @Table(name = "orders")

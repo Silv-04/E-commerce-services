@@ -28,6 +28,38 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Service métier pour la gestion des commandes.
+ * 
+ * <p>Ce service implémente toute la logique métier liée aux commandes :</p>
+ * <ul>
+ *   <li>Création de commandes avec validation de l'utilisateur et des produits</li>
+ *   <li>Gestion du stock (déduction à la création, restauration à l'annulation)</li>
+ *   <li>Transitions de statut avec règles métier</li>
+ *   <li>Communication inter-services via WebClient (User et Product services)</li>
+ * </ul>
+ * 
+ * <p><b>Règles métier importantes :</b></p>
+ * <ul>
+ *   <li>Une commande doit contenir au moins un article</li>
+ *   <li>L'utilisateur doit exister dans le service User</li>
+ *   <li>Tous les produits doivent être en stock suffisant</li>
+ *   <li>Les commandes DELIVERED ou CANCELLED ne peuvent plus être modifiées</li>
+ * </ul>
+ * 
+ * <p><b>Métriques Prometheus :</b></p>
+ * <ul>
+ *   <li>orders.created.total - Compteur des commandes créées</li>
+ *   <li>orders.cancelled.total - Compteur des commandes annulées</li>
+ * </ul>
+ * 
+ * @author E-commerce Team
+ * @version 1.0
+ * @since 2024-12
+ * @see OrderMapper
+ * @see UserClient
+ * @see ProductClient
+ */
 @Service
 @Transactional
 public class OrderService {

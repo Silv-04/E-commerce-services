@@ -14,6 +14,27 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Gestionnaire global des exceptions pour l'API REST.
+ * 
+ * <p>Ce composant intercepte toutes les exceptions lancées par les contrôleurs
+ * et les transforme en réponses HTTP appropriées avec un format standardisé.</p>
+ * 
+ * <p><b>Exceptions gérées :</b></p>
+ * <ul>
+ *   <li>{@link ResourceNotFoundException} → HTTP 404 (Not Found)</li>
+ *   <li>{@link BusinessException} → HTTP 400 (Bad Request)</li>
+ *   <li>{@link InsufficientStockException} → HTTP 400 (Bad Request)</li>
+ *   <li>{@link ServiceUnavailableException} → HTTP 503 (Service Unavailable)</li>
+ *   <li>{@link MethodArgumentNotValidException} → HTTP 400 (Validation errors)</li>
+ *   <li>{@link Exception} → HTTP 500 (Internal Server Error)</li>
+ * </ul>
+ * 
+ * @author E-commerce Team
+ * @version 1.0
+ * @since 2024-12
+ * @see ErrorResponse
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 

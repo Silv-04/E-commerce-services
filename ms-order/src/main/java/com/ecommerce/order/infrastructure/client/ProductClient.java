@@ -11,6 +11,31 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import java.time.Duration;
 import java.util.Optional;
 
+/**
+ * Client HTTP pour la communication avec le microservice Product (ms-product).
+ * 
+ * <p>Ce client utilise WebClient (Spring WebFlux) pour effectuer des appels REST
+ * synchrones vers le service Product sur le port 8082.</p>
+ * 
+ * <p><b>Fonctionnalités :</b></p>
+ * <ul>
+ *   <li>Récupération d'un produit par son ID</li>
+ *   <li>Mise à jour du stock d'un produit (PATCH)</li>
+ *   <li>Vérification de la disponibilité du service (health check)</li>
+ *   <li>Gestion des timeouts et des erreurs de connexion</li>
+ * </ul>
+ * 
+ * <p><b>Configuration :</b></p>
+ * <ul>
+ *   <li>services.product.url - URL de base du service Product</li>
+ *   <li>services.product.timeout - Timeout en secondes (défaut: 5)</li>
+ * </ul>
+ * 
+ * @author E-commerce Team
+ * @version 1.0
+ * @since 2024-12
+ * @see ProductDTO
+ */
 @Component
 public class ProductClient {
 

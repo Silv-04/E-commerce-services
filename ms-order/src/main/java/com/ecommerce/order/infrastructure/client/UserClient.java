@@ -11,6 +11,30 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import java.time.Duration;
 import java.util.Optional;
 
+/**
+ * Client HTTP pour la communication avec le microservice User (ms-membership).
+ * 
+ * <p>Ce client utilise WebClient (Spring WebFlux) pour effectuer des appels REST
+ * synchrones vers le service User sur le port 8081.</p>
+ * 
+ * <p><b>Fonctionnalités :</b></p>
+ * <ul>
+ *   <li>Récupération d'un utilisateur par son ID</li>
+ *   <li>Vérification de la disponibilité du service (health check)</li>
+ *   <li>Gestion des timeouts et des erreurs de connexion</li>
+ * </ul>
+ * 
+ * <p><b>Configuration :</b></p>
+ * <ul>
+ *   <li>services.user.url - URL de base du service User</li>
+ *   <li>services.user.timeout - Timeout en secondes (défaut: 5)</li>
+ * </ul>
+ * 
+ * @author E-commerce Team
+ * @version 1.0
+ * @since 2024-12
+ * @see UserDTO
+ */
 @Component
 public class UserClient {
 

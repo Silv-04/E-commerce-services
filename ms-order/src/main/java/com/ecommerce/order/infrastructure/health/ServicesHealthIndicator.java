@@ -8,6 +8,32 @@ import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
 
+/**
+ * Indicateur de santé personnalisé pour vérifier la disponibilité des services dépendants.
+ * 
+ * <p>Ce composant est utilisé par Spring Boot Actuator pour exposer l'état de santé
+ * des services User et Product via l'endpoint /actuator/health.</p>
+ * 
+ * <p><b>Services vérifiés :</b></p>
+ * <ul>
+ *   <li>User Service (ms-membership) sur le port 8081</li>
+ *   <li>Product Service (ms-product) sur le port 8082</li>
+ * </ul>
+ * 
+ * <p><b>États possibles :</b></p>
+ * <ul>
+ *   <li>UP - Tous les services sont disponibles</li>
+ *   <li>DOWN - Au moins un service est indisponible</li>
+ * </ul>
+ * 
+ * <p>Accessible via : GET /actuator/health</p>
+ * 
+ * @author E-commerce Team
+ * @version 1.0
+ * @since 2024-12
+ * @see UserClient
+ * @see ProductClient
+ */
 @Component
 public class ServicesHealthIndicator implements HealthIndicator {
 

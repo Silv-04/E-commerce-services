@@ -4,7 +4,21 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 
 /**
- * Entité représentant un article dans une commande.
+ * Entité JPA représentant un article (ligne) dans une commande.
+ * 
+ * <p>Chaque OrderItem fait référence à un produit du catalogue et stocke
+ * une copie du nom et du prix au moment de la commande pour garantir
+ * l'intégrité des données même si le produit est modifié par la suite.</p>
+ * 
+ * <p>Le sous-total (subtotal) est calculé automatiquement lors de la
+ * persistance : subtotal = quantity × unitPrice</p>
+ * 
+ * <p>Relation : ManyToOne avec Order (plusieurs articles appartiennent à une commande)</p>
+ * 
+ * @author E-commerce Team
+ * @version 1.0
+ * @since 2024-12
+ * @see Order
  */
 @Entity
 @Table(name = "order_items")

@@ -10,6 +10,19 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Mapper pour la conversion entre entités Order/OrderItem et leurs DTOs.
+ * 
+ * <p>Ce composant gère la transformation des objets du domaine vers les DTOs
+ * utilisés dans les réponses API. Il assure une séparation claire entre
+ * la couche domaine et la couche présentation.</p>
+ * 
+ * @author E-commerce Team
+ * @version 1.0
+ * @since 2024-12
+ * @see OrderResponseDTO
+ * @see OrderItemResponseDTO
+ */
 @Component
 public class OrderMapper {
 
