@@ -94,18 +94,33 @@ public class ProductService {
         return productMapper.toDTO(existingProduct);
     }
 
+    /**
+     * Désactive un produit (soft delete).
+     * 
+     * <p>Au lieu de supprimer physiquement le produit, on le désactive
+     * pour préserver l'intégrité des commandes qui y font référence.
+     * Un produit désactivé ne peut plus être commandé mais reste
+     * visible dans l'historique des commandes.</p>
+     * 
+     * @param id l'identifiant du produit à désactiver
+     * @throws RuntimeException si le produit n'existe pas
+     */
     @Transactional
     public void deleteProduct(Long id) {
-        log.debug("Suppression du produit avec l'ID: {}", id);
+        log.debug("Désactivation du produit avec l'ID: {}", id);
         
-        if (!productRepository.existsById(id)) {
-            log.error("Produit non trouvé avec l'ID: {}", id);
-            throw new RuntimeException("Produit non trouvé");
-        }
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Produit non trouvé avec l'ID: {}", id);
+                    return new RuntimeException("Produit non trouvé");
+                });
         
-        productRepository.deleteById(id);
+        // Soft delete : on désactive le produit au lieu de le supprimer
+        // pour préserver l'intégrité des commandes existantes
+        product.setActive(false);
+        productRepository.save(product);
         
-        log.info("Produit supprimé avec succès avec l'ID: {}", id);
+        log.info("Produit désactivé avec succès avec l'ID: {}", id);
     }
 
     public List<ProductResponseDTO> getProductByName(String name) {
