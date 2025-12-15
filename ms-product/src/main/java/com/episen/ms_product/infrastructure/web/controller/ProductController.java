@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.episen.ms_product.application.service.ProductService;
-import com.episen.ms_product.domain.enumerate.Category;
 import com.episen.ms_product.application.dto.ProductRequestDTO;
 import com.episen.ms_product.application.dto.ProductResponseDTO;
 
