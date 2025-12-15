@@ -37,7 +37,7 @@ import java.util.Optional;
  * @see ProductDTO
  */
 @Component
-public class ProductClient {
+public class ProductClient implements IProductClient {
 
     private static final Logger log = LoggerFactory.getLogger(ProductClient.class);
 

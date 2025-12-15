@@ -1,7 +1,7 @@
 package com.ecommerce.order.infrastructure.health;
 
 import com.ecommerce.order.infrastructure.client.ProductClient;
-import com.ecommerce.order.infrastructure.client.UserClient;
+import com.ecommerce.order.infrastructure.client.IUserClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.health.Health;
@@ -39,10 +39,10 @@ public class ServicesHealthIndicator implements HealthIndicator {
 
     private static final Logger log = LoggerFactory.getLogger(ServicesHealthIndicator.class);
 
-    private final UserClient userClient;
+    private final IUserClient userClient;
     private final ProductClient productClient;
 
-    public ServicesHealthIndicator(UserClient userClient, ProductClient productClient) {
+    public ServicesHealthIndicator(IUserClient userClient, ProductClient productClient) {
         this.userClient = userClient;
         this.productClient = productClient;
     }

@@ -4,7 +4,7 @@
 Microservice de gestion des commandes pour la plateforme e-commerce. Ce service permet de créer, consulter, modifier et annuler des commandes.
 
 ## Technologies utilisées
-- Java 17
+- Java 21
 - Spring Boot 3.2.0
 - Spring Data JPA
 - Spring WebFlux (WebClient pour les appels inter-services)

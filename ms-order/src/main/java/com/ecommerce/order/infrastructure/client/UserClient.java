@@ -36,7 +36,7 @@ import java.util.Optional;
  * @see UserDTO
  */
 @Component
-public class UserClient {
+public class UserClient implements IUserClient {
 
     private static final Logger log = LoggerFactory.getLogger(UserClient.class);
 

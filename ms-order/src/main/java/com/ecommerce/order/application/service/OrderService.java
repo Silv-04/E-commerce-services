@@ -8,9 +8,9 @@ import com.ecommerce.order.domain.entity.OrderItem;
 import com.ecommerce.order.domain.enumerate.OrderStatus;
 import com.ecommerce.order.domain.repository.OrderRepository;
 import com.ecommerce.order.domain.repository.OrderItemRepository;
-import com.ecommerce.order.infrastructure.client.ProductClient;
+import com.ecommerce.order.infrastructure.client.IProductClient;
 import com.ecommerce.order.infrastructure.client.ProductDTO;
-import com.ecommerce.order.infrastructure.client.UserClient;
+import com.ecommerce.order.infrastructure.client.IUserClient;
 import com.ecommerce.order.infrastructure.client.UserDTO;
 import com.ecommerce.order.infrastructure.exception.*;
 import io.micrometer.core.instrument.Counter;
@@ -69,29 +69,29 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final OrderMapper orderMapper;
-    private final UserClient userClient;
-    private final ProductClient productClient;
+    private final IUserClient userClient;
+    private final IProductClient productClient;
     private final Counter ordersCreatedCounter;
     private final Counter ordersCancelledCounter;
 
-    public OrderService(OrderRepository orderRepository, 
+            public OrderService(OrderRepository orderRepository, 
                        OrderItemRepository orderItemRepository,
                        OrderMapper orderMapper,
-                       UserClient userClient, 
-                       ProductClient productClient,
+                       IUserClient userClient, 
+                       IProductClient productClient,
                        MeterRegistry meterRegistry) {
-        this.orderRepository = orderRepository;
-        this.orderItemRepository = orderItemRepository;
-        this.orderMapper = orderMapper;
-        this.userClient = userClient;
-        this.productClient = productClient;
-        this.ordersCreatedCounter = Counter.builder("orders.created.total")
+            this.orderRepository = orderRepository;
+            this.orderItemRepository = orderItemRepository;
+            this.orderMapper = orderMapper;
+            this.userClient = userClient;
+            this.productClient = productClient;
+            this.ordersCreatedCounter = Counter.builder("orders.created.total")
                 .description("Nombre total de commandes créées")
                 .register(meterRegistry);
-        this.ordersCancelledCounter = Counter.builder("orders.cancelled.total")
+            this.ordersCancelledCounter = Counter.builder("orders.cancelled.total")
                 .description("Nombre total de commandes annulées")
                 .register(meterRegistry);
-    }
+            }
 
     public List<OrderResponseDTO> getAllOrders() {
         log.info("Récupération de toutes les commandes");
