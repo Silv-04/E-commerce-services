@@ -115,7 +115,7 @@ public class OrderController {
     public ResponseEntity<OrderResponseDTO> updateOrderStatus(
             @Parameter(description = "ID de la commande") @PathVariable Long id,
             @Valid @RequestBody StatusUpdateDTO statusDTO) {
-        log.info("PATCH /api/orders/{}/status - Mise à jour du statut: {}", id, statusDTO.getStatus());
+        log.info("PUT /api/orders/{}/status - Mise à jour du statut: {}", id, statusDTO.getStatus());
         OrderResponseDTO updatedOrder = orderService.updateOrderStatus(id, statusDTO);
         return ResponseEntity.ok(updatedOrder);
     }
