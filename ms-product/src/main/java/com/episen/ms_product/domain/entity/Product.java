@@ -26,6 +26,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Entité Product représentant un produit dans le système.
+ * Best practices :
+ * - Utilisation de Lombok pour réduire le boilerplate
+ * - Validation avec Bean Validation
+ * - Audit automatique avec @CreationTimestamp et @UpdateTimestamp
+ * - Builder pattern pour une construction flexible
+ */
 @Entity
 @Table(name = "product")
 @Data

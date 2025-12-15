@@ -1,0 +1,13 @@
+# Configuration pour le provisioning automatique des dashboards
+apiVersion: 1
+
+providers:
+  - name: 'E-Commerce Dashboards'
+    orgId: 1
+    folder: 'E-Commerce'
+    folderUid: 'ecommerce'
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards
