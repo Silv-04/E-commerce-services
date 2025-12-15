@@ -6,9 +6,19 @@ import com.episen.ms_product.application.dto.ProductRequestDTO;
 import com.episen.ms_product.application.dto.ProductResponseDTO;
 import com.episen.ms_product.domain.entity.Product;
 
+/**
+ * Mapper pour convertir entre Product et ses DTOs.
+ * Best practices :
+ * - Séparation de la logique de mapping
+ * - Conversion centralisée
+ * - Facilite les tests unitaires
+ */
 @Component
 public class ProductMapper {
     
+    /**
+     * Convertit un ProductRequestDTO en entité Product
+     */
     public Product toEntity(ProductRequestDTO productRequestDTO) {
         return Product.builder()
                 .name(productRequestDTO.getName())
@@ -19,6 +29,10 @@ public class ProductMapper {
                 .imageUrl(productRequestDTO.getImageUrl())
                 .build();
     }
+
+    /**
+     * Convertit une entité Product en ProductResponseDTO
+     */
     public ProductResponseDTO toDTO(Product product) {
         return ProductResponseDTO.builder()
                 .id(product.getId())
@@ -34,6 +48,9 @@ public class ProductMapper {
                 .build();
     }
 
+    /**
+     * Met à jour une entité Product existante avec les données du DTO
+     */
     public void updateEntityFromDTO(ProductRequestDTO productRequestDTO, Product product) {
         product.setName(productRequestDTO.getName());
         product.setStock(productRequestDTO.getStock());

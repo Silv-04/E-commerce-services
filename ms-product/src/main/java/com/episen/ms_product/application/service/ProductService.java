@@ -18,6 +18,15 @@ import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Service pour la gestion des produits.
+ * Best practices :
+ * - @Transactional pour la gestion des transactions
+ * - Logging avec SLF4J
+ * - Métriques personnalisées avec Micrometer
+ * - Gestion d'erreurs explicite avec exceptions métier
+ * - Séparation de la logique métier du contrôleur
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -28,6 +37,10 @@ public class ProductService {
     private final ProductMapper productMapper;
     private final MeterRegistry meterRegistry;
     
+    /** 
+     * Renvoie la liste de tous les produits
+     * @return List<ProductResponseDTO>
+     */
     public List<ProductResponseDTO> getAllProducts() {
         log.debug("Récupération de tous les produits");
         
@@ -40,6 +53,11 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Renvoie un produit à partir de son ID
+     * @param id
+     * @return ProductResponseDTO
+     */
     public ProductResponseDTO getProductById(Long id) {
         log.debug("Récupération du produit avec l'ID: {}", id);
         
@@ -54,6 +72,11 @@ public class ProductService {
         return productMapper.toDTO(product);
     }
     
+    /**
+     * Créé un nouveau produit à partir des informations fournies
+     * @param productRequestDTO
+     * @return ProductResponseDTO
+     */
     @Transactional
     public ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO) {
         log.debug("Création d'un nouveau produit: {}", productRequestDTO.getName());
@@ -72,6 +95,12 @@ public class ProductService {
         return productMapper.toDTO(savedProduct);
     }
 
+    /**
+     * Met à jour un produit existant à partir de son ID et des nouvelles informations fournies
+     * @param id
+     * @param productRequestDTO
+     * @return ProductResponseDTO
+     */
     @Transactional
     public ProductResponseDTO updateProduct(Long id, ProductRequestDTO productRequestDTO) {
         log.debug("Mise à jour du produit avec l'ID: {}", id);
@@ -123,6 +152,11 @@ public class ProductService {
         log.info("Produit désactivé avec succès avec l'ID: {}", id);
     }
 
+    /**
+     * Renvoie les informations des produits correspondant au nom donné
+     * @param name
+     * @return List<ProductResponseDTO>
+     */
     public List<ProductResponseDTO> getProductByName(String name) {
         log.debug("Récupération du produit avec le nom: {}", name);
         
@@ -142,6 +176,11 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Renvoie les produits d'une catégorie donnée
+     * @param category
+     * @return List<ProductResponseDTO>
+     */
     public List<ProductResponseDTO> getProductsByCategory(String category) {
         log.debug("Récupération des produits dans la catégorie: {}", category);
         
@@ -154,6 +193,10 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Renvoie les produits disponibles (stock > 0)
+     * @return List<ProductResponseDTO>
+     */
     public List<ProductResponseDTO> getAvailableProducts() {
         log.debug("Récupération des produits disponibles");
         
@@ -166,6 +209,12 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Met à jour le stock d'un produit à partir de son ID et de la quantité à ajouter
+     * @param id
+     * @param quantity
+     * @return ProductResponseDTO
+     */
     @Transactional
     public ProductResponseDTO updateStock(Long id, int quantity) {
         log.debug("Mise à jour du stock pour le produit avec l'ID: {}", id);

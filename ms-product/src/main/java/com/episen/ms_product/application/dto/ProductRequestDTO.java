@@ -4,8 +4,6 @@ import java.math.BigDecimal;
 
 import com.episen.ms_product.domain.enumerate.Category;
 
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Min;
@@ -17,6 +15,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO pour la création d'un produit.
+ * Best practices :
+ * - Séparation des DTOs Request/Response
+ * - Validation au niveau DTO
+ * - Utilisation de Builder pattern
+ * - Pas d'exposition de l'entité directement dans l'API
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

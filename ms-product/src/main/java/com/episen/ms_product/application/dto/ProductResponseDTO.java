@@ -10,6 +10,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO pour la réponse d'un produit.
+ * Best practices :
+ * - Séparation Request/Response
+ * - Formatage JSON cohérent pour les dates
+ * - Exposition sélective des champs (pas de données sensibles)
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
