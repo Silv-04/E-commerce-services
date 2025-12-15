@@ -14,6 +14,7 @@ C:\Users\Ismail Benaissa\Desktop\E-commerce-services\ms-order\src\main\java\com\
 C:\Users\Ismail Benaissa\Desktop\E-commerce-services\ms-order\src\main\java\com\ecommerce\order\infrastructure\exception\ErrorResponse.java
 C:\Users\Ismail Benaissa\Desktop\E-commerce-services\ms-order\src\main\java\com\ecommerce\order\infrastructure\client\UserClient.java
 C:\Users\Ismail Benaissa\Desktop\E-commerce-services\ms-order\src\main\java\com\ecommerce\order\infrastructure\client\ProductClient.java
+C:\Users\Ismail Benaissa\Desktop\E-commerce-services\ms-order\src\main\java\com\ecommerce\order\infrastructure\metrics\MetricsConfig.java
 C:\Users\Ismail Benaissa\Desktop\E-commerce-services\ms-order\src\main\java\com\ecommerce\order\application\dto\OrderItemRequestDTO.java
 C:\Users\Ismail Benaissa\Desktop\E-commerce-services\ms-order\src\main\java\com\ecommerce\order\infrastructure\health\ServicesHealthIndicator.java
 C:\Users\Ismail Benaissa\Desktop\E-commerce-services\ms-order\src\main\java\com\ecommerce\order\infrastructure\client\ProductDTO.java
