@@ -25,6 +25,7 @@ com\ecommerce\order\infrastructure\exception\ServiceUnavailableException.class
 com\ecommerce\order\infrastructure\client\UserClient.class
 com\ecommerce\order\infrastructure\exception\ErrorResponse.class
 com\ecommerce\order\application\dto\OrderRequestDTO$OrderRequestDTOBuilder.class
+com\ecommerce\order\infrastructure\metrics\MetricsConfig.class
 com\ecommerce\order\domain\entity\OrderItem$OrderItemBuilder.class
 com\ecommerce\order\infrastructure\exception\ErrorResponse$FieldError.class
 com\ecommerce\order\application\dto\StatusUpdateDTO.class
