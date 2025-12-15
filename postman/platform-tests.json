@@ -358,228 +358,6 @@
 			]
 		},
 		{
-			"name": "Tests Product API",
-			"item": [
-				{
-					"name": "Lister tous les produits",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{productBaseUrl}}/api/v1/products",
-							"host": [
-								"{{productBaseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"products"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Détail produit A",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{productBaseUrl}}/api/v1/products/{{productIdA}}",
-							"host": [
-								"{{productBaseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"products",
-								"{{productIdA}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Rechercher produit par nom",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{productBaseUrl}}/api/v1/products/search?name=Laptop",
-							"host": [
-								"{{productBaseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"products",
-								"search"
-							],
-							"query": [
-								{
-									"key": "name",
-									"value": "Laptop"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Filtrer par catégorie ELECTRONICS",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{productBaseUrl}}/api/v1/products/category/ELECTRONICS",
-							"host": [
-								"{{productBaseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"products",
-								"category",
-								"ELECTRONICS"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Filtrer par catégorie BOOKS",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{productBaseUrl}}/api/v1/products/category/BOOKS",
-							"host": [
-								"{{productBaseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"products",
-								"category",
-								"BOOKS"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Produits disponibles (en stock)",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{productBaseUrl}}/api/v1/products/available",
-							"host": [
-								"{{productBaseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"products",
-								"available"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Modifier produit A",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\"name\": \"Laptop X Pro\", \"description\": \"Ultrabook 13 pouces upgraded\", \"price\": 1499.99, \"stock\": 8, \"category\": \"ELECTRONICS\"}"
-						},
-						"url": {
-							"raw": "{{productBaseUrl}}/api/v1/products/{{productIdA}}",
-							"host": [
-								"{{productBaseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"products",
-								"{{productIdA}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Mettre à jour le stock produit B",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\"stock\": 45}"
-						},
-						"url": {
-							"raw": "{{productBaseUrl}}/api/v1/products/{{productIdB}}/stock",
-							"host": [
-								"{{productBaseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"products",
-								"{{productIdB}}",
-								"stock"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Supprimer produit (devrait échouer si dans commande)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.expect(pm.response.code).to.be.oneOf([400, 409, 200, 204]);"
-								]
-							}
-						}
-					],
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{productBaseUrl}}/api/v1/products/{{productIdA}}",
-							"host": [
-								"{{productBaseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"products",
-								"{{productIdA}}"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
 			"name": "Tests Order API",
 			"item": [
 				{
@@ -770,6 +548,228 @@
 								"v1",
 								"orders",
 								"{{orderId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Tests Product API",
+			"item": [
+				{
+					"name": "Lister tous les produits",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{productBaseUrl}}/api/v1/products",
+							"host": [
+								"{{productBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Détail produit A",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{productBaseUrl}}/api/v1/products/{{productIdA}}",
+							"host": [
+								"{{productBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"{{productIdA}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Rechercher produit par nom",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{productBaseUrl}}/api/v1/products/search?name=Laptop",
+							"host": [
+								"{{productBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"search"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "Laptop"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Filtrer par catégorie ELECTRONICS",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{productBaseUrl}}/api/v1/products/category/ELECTRONICS",
+							"host": [
+								"{{productBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"category",
+								"ELECTRONICS"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Filtrer par catégorie BOOKS",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{productBaseUrl}}/api/v1/products/category/BOOKS",
+							"host": [
+								"{{productBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"category",
+								"BOOKS"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Produits disponibles (en stock)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{productBaseUrl}}/api/v1/products/available",
+							"host": [
+								"{{productBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"available"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Modifier produit A",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"name\": \"Laptop X Pro\", \"description\": \"Ultrabook 13 pouces upgraded\", \"price\": 1499.99, \"stock\": 8, \"category\": \"ELECTRONICS\"}"
+						},
+						"url": {
+							"raw": "{{productBaseUrl}}/api/v1/products/{{productIdA}}",
+							"host": [
+								"{{productBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"{{productIdA}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mettre à jour le stock produit B",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"quantity\": 45}"
+						},
+						"url": {
+							"raw": "{{productBaseUrl}}/api/v1/products/{{productIdB}}/stock",
+							"host": [
+								"{{productBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"{{productIdB}}",
+								"stock"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Supprimer produit (devrait échouer si dans commande)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.expect(pm.response.code).to.be.oneOf([400, 409, 200, 204]);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{productBaseUrl}}/api/v1/products/{{productIdA}}",
+							"host": [
+								"{{productBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"{{productIdA}}"
 							]
 						}
 					},
