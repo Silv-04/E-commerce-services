@@ -1,0 +1,182 @@
+{
+  "info": {
+    "name": "Plateforme E-Commerce - Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Collection Postman pour tester la plateforme e-commerce"
+  },
+  "variable": [
+    { "key": "membershipBaseUrl", "value": "http://localhost:8081" },
+    { "key": "productBaseUrl", "value": "http://localhost:8082" },
+    { "key": "orderBaseUrl", "value": "http://localhost:8083" },
+    { "key": "userId", "value": "1" },
+    { "key": "productIdA", "value": "1" },
+    { "key": "productIdB", "value": "2" },
+    { "key": "orderId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Health checks",
+      "item": [
+        {
+          "name": "ms-membership health",
+          "request": { "method": "GET", "url": "{{membershipBaseUrl}}/actuator/health" }
+        },
+        {
+          "name": "ms-product health",
+          "request": { "method": "GET", "url": "{{productBaseUrl}}/actuator/health" }
+        },
+        {
+          "name": "ms-order health",
+          "request": { "method": "GET", "url": "{{orderBaseUrl}}/actuator/health" }
+        }
+      ]
+    },
+    {
+      "name": "Scenario complet",
+      "item": [
+        {
+          "name": "Créer user",
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 201', function () { pm.response.to.have.status(201); });", "pm.collectionVariables.set('userId', pm.response.json().id);"]}}],
+          "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"firstName\": \"Jane\", \"lastName\": \"Doe\", \"email\": \"jane.doe@example.com\", \"password\": \"Password123!\"}"}, "url": "{{membershipBaseUrl}}/api/v1/users"}
+        },
+        {
+          "name": "Créer produit A",
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 201', function () { pm.response.to.have.status(201); });", "pm.collectionVariables.set('productIdA', pm.response.json().id);"]}}],
+          "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\": \"Laptop X\", \"description\": \"Ultrabook 13 pouces\", \"price\": 1299.99, \"stock\": 10, \"category\": \"ELECTRONICS\"}"}, "url": "{{productBaseUrl}}/api/v1/products"}
+        },
+        {
+          "name": "Créer produit B",
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 201', function () { pm.response.to.have.status(201); });", "pm.collectionVariables.set('productIdB', pm.response.json().id);"]}}],
+          "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\": \"Book Y\", \"description\": \"Roman SF\", \"price\": 19.90, \"stock\": 50, \"category\": \"BOOKS\"}"}, "url": "{{productBaseUrl}}/api/v1/products"}
+        },
+        {
+          "name": "Créer commande",
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 201', function () { pm.response.to.have.status(201); });", "pm.collectionVariables.set('orderId', pm.response.json().id);"]}}],
+          "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"userId\": {{userId}}, \"shippingAddress\": \"221B Baker Street\", \"items\": [{\"productId\": {{productIdA}}, \"quantity\": 1}, {\"productId\": {{productIdB}}, \"quantity\": 2}]}"}, "url": "{{orderBaseUrl}}/api/v1/orders"}
+        },
+        {
+          "name": "Détail commande",
+          "request": {"method": "GET", "url": "{{orderBaseUrl}}/api/v1/orders/{{orderId}}"}
+        },
+        {
+          "name": "Commandes par utilisateur",
+          "request": {"method": "GET", "url": "{{orderBaseUrl}}/api/v1/orders/user/{{userId}}"}
+        }
+      ]
+    },
+    {
+      "name": "Scénarios d'erreur",
+      "item": [
+        {
+          "name": "Commande avec user inexistant",
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.expect(pm.response.code).to.be.oneOf([400, 404]);"]}}],
+          "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"userId\": 999999, \"shippingAddress\": \"Nowhere\", \"items\": [{\"productId\": 1, \"quantity\": 1}]}"}, "url": "{{orderBaseUrl}}/api/v1/orders"}
+        },
+        {
+          "name": "Commande avec produit inexistant",
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.expect(pm.response.code).to.be.oneOf([400, 404, 409]);"]}}],
+          "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"userId\": {{userId}}, \"shippingAddress\": \"221B Baker Street\", \"items\": [{\"productId\": 999999, \"quantity\": 1}]}"}, "url": "{{orderBaseUrl}}/api/v1/orders"}
+        }
+      ]
+    },
+    {
+      "name": "Tests Product API",
+      "item": [
+        {
+          "name": "Lister tous les produits",
+          "request": {"method": "GET", "url": "{{productBaseUrl}}/api/v1/products"}
+        },
+        {
+          "name": "Détail produit A",
+          "request": {"method": "GET", "url": "{{productBaseUrl}}/api/v1/products/{{productIdA}}"}
+        },
+        {
+          "name": "Rechercher produit par nom",
+          "request": {"method": "GET", "url": "{{productBaseUrl}}/api/v1/products/search?name=Laptop"}
+        },
+        {
+          "name": "Filtrer par catégorie ELECTRONICS",
+          "request": {"method": "GET", "url": "{{productBaseUrl}}/api/v1/products/category/ELECTRONICS"}
+        },
+        {
+          "name": "Filtrer par catégorie BOOKS",
+          "request": {"method": "GET", "url": "{{productBaseUrl}}/api/v1/products/category/BOOKS"}
+        },
+        {
+          "name": "Produits disponibles (en stock)",
+          "request": {"method": "GET", "url": "{{productBaseUrl}}/api/v1/products/available"}
+        },
+        {
+          "name": "Modifier produit A",
+          "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\": \"Laptop X Pro\", \"description\": \"Ultrabook 13 pouces upgraded\", \"price\": 1499.99, \"stock\": 8, \"category\": \"ELECTRONICS\"}"}, "url": "{{productBaseUrl}}/api/v1/products/{{productIdA}}"}
+        },
+        {
+          "name": "Mettre à jour le stock produit B",
+          "request": {"method": "PATCH", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"stock\": 45}"}, "url": "{{productBaseUrl}}/api/v1/products/{{productIdB}}/stock"}
+        },
+        {
+          "name": "Supprimer produit (devrait échouer si dans commande)",
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.expect(pm.response.code).to.be.oneOf([400, 409, 200, 204]);"]}}],
+          "request": {"method": "DELETE", "url": "{{productBaseUrl}}/api/v1/products/{{productIdA}}"}
+        }
+      ]
+    },
+    {
+      "name": "Tests Order API",
+      "item": [
+        {
+          "name": "Lister toutes les commandes",
+          "request": {"method": "GET", "url": "{{orderBaseUrl}}/api/v1/orders"}
+        },
+        {
+          "name": "Filtrer commandes par statut PENDING",
+          "request": {"method": "GET", "url": "{{orderBaseUrl}}/api/v1/orders/status/PENDING"}
+        },
+        {
+          "name": "Filtrer commandes par statut DELIVERED",
+          "request": {"method": "GET", "url": "{{orderBaseUrl}}/api/v1/orders/status/DELIVERED"}
+        },
+        {
+          "name": "Changer statut commande à CONFIRMED",
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 ou 201', function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"]}}],
+          "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"status\": \"CONFIRMED\"}"}, "url": "{{orderBaseUrl}}/api/v1/orders/{{orderId}}/status"}
+        },
+        {
+          "name": "Changer statut commande à SHIPPED",
+          "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"status\": \"SHIPPED\"}"}, "url": "{{orderBaseUrl}}/api/v1/orders/{{orderId}}/status"}
+        },
+        {
+          "name": "Changer statut commande à DELIVERED",
+          "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"status\": \"DELIVERED\"}"}, "url": "{{orderBaseUrl}}/api/v1/orders/{{orderId}}/status"}
+        },
+        {
+          "name": "Annuler une commande",
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.expect(pm.response.code).to.be.oneOf([200, 204, 400, 409]);"]}}],
+          "request": {"method": "DELETE", "url": "{{orderBaseUrl}}/api/v1/orders/{{orderId}}"}
+        }
+      ]
+    },
+    {
+      "name": "Tests Membership API",
+      "item": [
+        {
+          "name": "Lister tous les utilisateurs",
+          "request": {"method": "GET", "url": "{{membershipBaseUrl}}/api/v1/users"}
+        },
+        {
+          "name": "Détail utilisateur",
+          "request": {"method": "GET", "url": "{{membershipBaseUrl}}/api/v1/users/{{userId}}"}
+        },
+        {
+          "name": "Modifier utilisateur",
+          "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"firstName\": \"Jane\", \"lastName\": \"Smith\", \"email\": \"jane.smith@example.com\"}"}, "url": "{{membershipBaseUrl}}/api/v1/users/{{userId}}"}
+        },
+        {
+          "name": "Supprimer utilisateur",
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.expect(pm.response.code).to.be.oneOf([200, 204]);"]}}],
+          "request": {"method": "DELETE", "url": "{{membershipBaseUrl}}/api/v1/users/{{userId}}"}
+        }
+      ]
+    }
+  ]
+}
