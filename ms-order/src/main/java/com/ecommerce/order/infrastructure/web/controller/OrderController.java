@@ -104,7 +104,7 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdOrder);
     }
 
-    @PatchMapping("/{id}/status")
+    @PutMapping("/{id}/status")
     @Operation(summary = "Mettre à jour le statut d'une commande", 
                description = "Modifie le statut d'une commande existante (avec validation des transitions)")
     @ApiResponses(value = {

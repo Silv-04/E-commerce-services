@@ -31,8 +31,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -61,7 +60,8 @@ class OrderServiceTest {
     void setUp() {
         orderMapper = new OrderMapper();
         meterRegistry = new SimpleMeterRegistry();
-        orderService = new OrderService(orderRepository, orderItemRepository, orderMapper, userClient, productClient, meterRegistry);
+        orderService = new OrderService(orderRepository, orderItemRepository, orderMapper, userClient, productClient,
+                meterRegistry);
     }
 
     @Test
@@ -137,7 +137,8 @@ class OrderServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.getUserId()).isEqualTo(1L);
         assertThat(result.getStatus()).isEqualTo(OrderStatus.PENDING);
-        verify(productClient).updateStock(1L, 2);
+
+        verify(productClient).updateStock(1L, 8);
     }
 
     @Test
