@@ -36,10 +36,10 @@ server:
 # Configuration des services externes
 services:
   user:
-    url: http://localhost:8081
+    url: ${USER_SERVICE_URL:http://membership:8081}
     timeout: 5
   product:
-    url: http://localhost:8082
+    url: ${PRODUCT_SERVICE_URL:http://product:8082}
     timeout: 5
 
 # Configuration Actuator
@@ -52,11 +52,12 @@ management:
     health:
       show-details: always
   metrics:
-    export:
-      prometheus:
-        enabled: true
+    prometheus:
+      metrics:
+        export:
+          enabled: true
 
-# Configuration OpenAPI/Swagger
+        # Configuration OpenAPI/Swagger
 springdoc:
   api-docs:
     path: /api-docs

@@ -11,7 +11,7 @@
 	</parent>
 	<groupId>com.episen</groupId>
 	<artifactId>ms-product</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>ms-product</name>
 	<description>Membership project - part of ecommerce platform</description>
 

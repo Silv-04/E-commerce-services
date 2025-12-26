@@ -48,9 +48,52 @@ services:
     networks:
       - monitoring
 
+  membership:
+    build:
+      context: ./ms-membership
+      dockerfile: Dockerfile
+    container_name: membership_service
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./keys:/app/keys
+    networks:
+      - monitoring
+
+  product:
+    build:
+      context: ./ms-product
+      dockerfile: Dockerfile
+    container_name: product_service
+    ports:
+      - "8082:8082"
+    volumes:
+      - ./keys:/app/keys
+    networks:
+      - monitoring
+
+  order:
+    build:
+      context: ./ms-order
+      dockerfile: Dockerfile
+    container_name: order_service
+    ports:
+      - "8083:8083"
+    volumes:
+      - ./keys:/app/keys
+    environment:
+      USER_SERVICE_URL: "http://membership:8081"
+      PRODUCT_SERVICE_URL: "http://product:8082"
+    networks:
+      - monitoring
+    depends_on:
+      - membership
+      - product
+
 volumes:
   prometheus_data:
   grafana_data:
+  keys:
 
 networks:
   monitoring:
