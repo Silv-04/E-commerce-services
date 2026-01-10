@@ -87,7 +87,6 @@ services:
     networks:
       - monitoring
     depends_on:
-      - membership
       - product
 
 volumes:

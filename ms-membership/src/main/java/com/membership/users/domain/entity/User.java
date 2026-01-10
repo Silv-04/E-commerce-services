@@ -48,6 +48,15 @@ public class User {
     @Column(name = "email", nullable = false, unique = true, length = 100)
     private String email;
 
+    @Column(name = "username", length = 50)
+    private String username;
+
+    @Column(name = "password", nullable = false, length = 255)
+    private String password;
+
+    @Column(name = "roles", columnDefinition = "json")
+    private java.util.List<String> roles;
+
     @Column(name = "active")
     private Boolean active = true;
 

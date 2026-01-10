@@ -1,0 +1,692 @@
+{
+  "info": {
+    "_postman_id": "secured-ecommerce-platform",
+    "name": "E-Commerce Platform - Tests Sécurisation JWT",
+    "description": "Collection Postman pour tester la plateforme e-commerce avec authentification JWT et sécurité RSA",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Configuration et Variables",
+      "item": [
+        {
+          "name": "Initialiser les variables",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Configuration des URLs de base",
+                  "pm.collectionVariables.set('membershipBaseUrl', 'http://localhost:8081');",
+                  "pm.collectionVariables.set('productBaseUrl', 'http://localhost:8082');",
+                  "pm.collectionVariables.set('orderBaseUrl', 'http://localhost:8083');",
+                  "",
+                  "// Credentials par défaut",
+                  "pm.collectionVariables.set('testEmail', 'user@example.com');",
+                  "pm.collectionVariables.set('testPassword', 'Password123!');",
+                  "",
+                  "// Token JWT (sera rempli par le login)",
+                  "pm.collectionVariables.set('jwtToken', '');",
+                  "pm.collectionVariables.set('tokenExpiresIn', '3600');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{membershipBaseUrl}}/api/v1/users",
+              "host": ["{{membershipBaseUrl}}"],
+              "path": ["api", "v1", "users"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Health Checks",
+      "item": [
+        {
+          "name": "Health - Membership",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{membershipBaseUrl}}/actuator/health",
+              "host": ["{{membershipBaseUrl}}"],
+              "path": ["actuator", "health"]
+            }
+          }
+        },
+        {
+          "name": "Health - Product",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{productBaseUrl}}/actuator/health",
+              "host": ["{{productBaseUrl}}"],
+              "path": ["actuator", "health"]
+            }
+          }
+        },
+        {
+          "name": "Health - Order",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{orderBaseUrl}}/actuator/health",
+              "host": ["{{orderBaseUrl}}"],
+              "path": ["actuator", "health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Authentification JWT",
+      "item": [
+        {
+          "name": "3.1 Créer un utilisateur",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201 Created', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Response contient id', function () {",
+                  "  pm.expect(jsonData).to.have.property('id');",
+                  "});",
+                  "",
+                  "// Sauvegarde l'id pour les prochaines requêtes",
+                  "pm.collectionVariables.set('userId', jsonData.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{membershipBaseUrl}}/api/v1/users",
+              "host": ["{{membershipBaseUrl}}"],
+              "path": ["api", "v1", "users"]
+            }
+          }
+        },
+        {
+          "name": "3.2 Login - Récupérer le JWT",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Response contient token', function () {",
+                  "  pm.expect(jsonData).to.have.property('token');",
+                  "  pm.expect(jsonData.token).to.be.a('string');",
+                  "  pm.expect(jsonData.token.length).to.be.above(100);",
+                  "});",
+                  "",
+                  "pm.test('Token commence par eyJ (JWT valide)', function () {",
+                  "  pm.expect(jsonData.token).to.match(/^eyJ[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$/);",
+                  "});",
+                  "",
+                  "pm.test('Response contient expiresIn', function () {",
+                  "  pm.expect(jsonData).to.have.property('expiresIn');",
+                  "  pm.expect(jsonData.expiresIn).to.equal(3600);",
+                  "});",
+                  "",
+                  "// Sauvegarde le token pour les requêtes suivantes",
+                  "pm.collectionVariables.set('jwtToken', jsonData.token);",
+                  "pm.collectionVariables.set('tokenExpiresIn', jsonData.expiresIn);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{membershipBaseUrl}}/api/v1/auth/login",
+              "host": ["{{membershipBaseUrl}}"],
+              "path": ["api", "v1", "auth", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Tests de Sécurité - Accès avec Token",
+      "item": [
+        {
+          "name": "4.1 GET Products - Avec token valide ✓",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK - Token accepté', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response est un array', function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log('✓ Accès Product autorisé avec token valide');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{productBaseUrl}}/api/v1/products",
+              "host": ["{{productBaseUrl}}"],
+              "path": ["api", "v1", "products"]
+            }
+          }
+        },
+        {
+          "name": "4.2 POST Order - Avec token valide ✓",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201 Created - Token accepté', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Response contient id', function () {",
+                  "  pm.expect(jsonData).to.have.property('id');",
+                  "});",
+                  "",
+                  "// Sauvegarde l'id de la commande pour les tests suivants",
+                  "pm.collectionVariables.set('orderId', jsonData.id);",
+                  "",
+                  "console.log('✓ Création commande autorisée avec token valide');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": {{userId}},\n  \"productId\": 1,\n  \"quantity\": 2,\n  \"totalPrice\": 99.99\n}"
+            },
+            "url": {
+              "raw": "{{orderBaseUrl}}/api/v1/orders",
+              "host": ["{{orderBaseUrl}}"],
+              "path": ["api", "v1", "orders"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Tests de Sécurité - Rejet sans Token",
+      "item": [
+        {
+          "name": "5.1 GET Products - SANS token ✗ (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 401 Unauthorized - Token absent', function () {",
+                  "  pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "console.log('✓ Accès Product rejeté sans token');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{productBaseUrl}}/api/v1/products",
+              "host": ["{{productBaseUrl}}"],
+              "path": ["api", "v1", "products"]
+            }
+          }
+        },
+        {
+          "name": "5.2 POST Order - SANS token ✗ (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 401 Unauthorized - Token absent', function () {",
+                  "  pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "console.log('✓ Création commande rejetée sans token');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": {{userId}},\n  \"productId\": 1,\n  \"quantity\": 1,\n  \"totalPrice\": 49.99\n}"
+            },
+            "url": {
+              "raw": "{{orderBaseUrl}}/api/v1/orders",
+              "host": ["{{orderBaseUrl}}"],
+              "path": ["api", "v1", "orders"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Tests de Sécurité - Token Invalide",
+      "item": [
+        {
+          "name": "6.1 GET Products - Token invalide ✗ (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 401 Unauthorized - Token invalide', function () {",
+                  "  pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "console.log('✓ Accès Product rejeté avec token invalide');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer invalid.jwt.token"
+              }
+            ],
+            "url": {
+              "raw": "{{productBaseUrl}}/api/v1/products",
+              "host": ["{{productBaseUrl}}"],
+              "path": ["api", "v1", "products"]
+            }
+          }
+        },
+        {
+          "name": "6.2 GET Products - Header malformé ✗ (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 401 Unauthorized - Header malformé', function () {",
+                  "  pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "console.log('✓ Accès Product rejeté avec header malformé (sans Bearer)');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{jwtToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{productBaseUrl}}/api/v1/products",
+              "host": ["{{productBaseUrl}}"],
+              "path": ["api", "v1", "products"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Tests Endpoints Publics (Sans authentification)",
+      "item": [
+        {
+          "name": "7.1 GET /actuator/health - Public ✓",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK - Endpoint public', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Réponse contient status', function () {",
+                  "  pm.expect(jsonData).to.have.property('status');",
+                  "});",
+                  "",
+                  "console.log('✓ Endpoint /actuator/health accessible sans token');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{productBaseUrl}}/actuator/health",
+              "host": ["{{productBaseUrl}}"],
+              "path": ["actuator", "health"]
+            }
+          }
+        },
+        {
+          "name": "7.2 GET /v3/api-docs - Public ✓",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK - Endpoint public', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Réponse contient info API', function () {",
+                  "  pm.expect(jsonData).to.have.property('info');",
+                  "  pm.expect(jsonData).to.have.property('paths');",
+                  "});",
+                  "",
+                  "console.log('✓ Endpoint OpenAPI accessible sans token');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{productBaseUrl}}/v3/api-docs",
+              "host": ["{{productBaseUrl}}"],
+              "path": ["v3", "api-docs"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Scénario Complet Intégré",
+      "item": [
+        {
+          "name": "8.1 Créer user + Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('jwtToken', jsonData.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{membershipBaseUrl}}/api/v1/auth/login",
+              "host": ["{{membershipBaseUrl}}"],
+              "path": ["api", "v1", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "8.2 Récupérer les produits",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.length > 0) {",
+                  "  pm.collectionVariables.set('productId', jsonData[0].id);",
+                  "  console.log('Produit sélectionné: ' + jsonData[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{productBaseUrl}}/api/v1/products",
+              "host": ["{{productBaseUrl}}"],
+              "path": ["api", "v1", "products"]
+            }
+          }
+        },
+        {
+          "name": "8.3 Créer une commande",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201 Created', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Commande créée avec succès', function () {",
+                  "  pm.expect(jsonData).to.have.property('id');",
+                  "  pm.expect(jsonData).to.have.property('userId');",
+                  "  pm.expect(jsonData).to.have.property('productId');",
+                  "});",
+                  "",
+                  "pm.collectionVariables.set('orderId', jsonData.id);",
+                  "console.log('✓ Commande créée: ' + jsonData.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": {{userId}},\n  \"productId\": 1,\n  \"quantity\": 2,\n  \"totalPrice\": 99.99\n}"
+            },
+            "url": {
+              "raw": "{{orderBaseUrl}}/api/v1/orders",
+              "host": ["{{orderBaseUrl}}"],
+              "path": ["api", "v1", "orders"]
+            }
+          }
+        },
+        {
+          "name": "8.4 Récupérer la commande créée",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Commande contient les détails corrects', function () {",
+                  "  pm.expect(jsonData.id).to.equal(pm.collectionVariables.get('orderId'));",
+                  "});",
+                  "",
+                  "console.log('✓ Commande récupérée avec succès');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{orderBaseUrl}}/api/v1/orders/{{orderId}}",
+              "host": ["{{orderBaseUrl}}"],
+              "path": ["api", "v1", "orders", "{{orderId}}"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "membershipBaseUrl",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "productBaseUrl",
+      "value": "http://localhost:8082"
+    },
+    {
+      "key": "orderBaseUrl",
+      "value": "http://localhost:8083"
+    },
+    {
+      "key": "testEmail",
+      "value": "user@example.com"
+    },
+    {
+      "key": "testPassword",
+      "value": "Password123!"
+    },
+    {
+      "key": "jwtToken",
+      "value": ""
+    },
+    {
+      "key": "tokenExpiresIn",
+      "value": "3600"
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "productId",
+      "value": ""
+    },
+    {
+      "key": "orderId",
+      "value": ""
+    }
+  ]
+}
