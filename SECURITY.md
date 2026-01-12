@@ -184,12 +184,36 @@ Tous les services accèdent aux clés via le répertoire monté.
 
 ## Configuration Spring Security
 
-### SecurityConfig
+### Membership Service - SecurityConfig
+
+Configuration minimale - Spring Boot expose l'endpoint sans authentification par défaut :
+
+```java
+@Configuration
+public class SecurityConfig {
+    
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+}
+```
+
+**Note:** Le endpoint `/api/v1/auth/login` est accessible publiquement. Pour une sécurité accrue en production, ajouter `@EnableWebSecurity` et `HttpSecurity.authorizeHttpRequests()`.
+
+### Product & Order Services - SecurityConfig
+
+Protège tous les endpoints sauf les health checks et OpenAPI :
 
 ```java
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+    private final JwtAuthentificationFilter jwtAuthentificationFilter;
+
+    public SecurityConfig(JwtAuthentificationFilter jwtAuthentificationFilter) {
+        this.jwtAuthentificationFilter = jwtAuthentificationFilter;
+    }
     
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
