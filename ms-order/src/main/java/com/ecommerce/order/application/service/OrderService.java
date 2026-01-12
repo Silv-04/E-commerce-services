@@ -1,6 +1,5 @@
 package com.ecommerce.order.application.service;
 
-
 import com.ecommerce.order.application.dto.*;
 import com.ecommerce.order.application.mapper.OrderMapper;
 import com.ecommerce.order.domain.entity.Order;
@@ -10,15 +9,21 @@ import com.ecommerce.order.domain.repository.OrderRepository;
 import com.ecommerce.order.domain.repository.OrderItemRepository;
 import com.ecommerce.order.infrastructure.client.IProductClient;
 import com.ecommerce.order.infrastructure.client.ProductDTO;
+import com.ecommerce.order.infrastructure.client.UserClient;
 import com.ecommerce.order.infrastructure.client.IUserClient;
+import com.ecommerce.order.infrastructure.client.ProductClient;
 import com.ecommerce.order.infrastructure.client.UserDTO;
 import com.ecommerce.order.infrastructure.exception.*;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -31,26 +36,35 @@ import java.util.stream.Collectors;
 /**
  * Service métier pour la gestion des commandes.
  * 
- * <p>Ce service implémente toute la logique métier liée aux commandes :</p>
+ * <p>
+ * Ce service implémente toute la logique métier liée aux commandes :
+ * </p>
  * <ul>
- *   <li>Création de commandes avec validation de l'utilisateur et des produits</li>
- *   <li>Gestion du stock (déduction à la création, restauration à l'annulation)</li>
- *   <li>Transitions de statut avec règles métier</li>
- *   <li>Communication inter-services via WebClient (User et Product services)</li>
+ * <li>Création de commandes avec validation de l'utilisateur et des
+ * produits</li>
+ * <li>Gestion du stock (déduction à la création, restauration à
+ * l'annulation)</li>
+ * <li>Transitions de statut avec règles métier</li>
+ * <li>Communication inter-services via WebClient (User et Product
+ * services)</li>
  * </ul>
  * 
- * <p><b>Règles métier importantes :</b></p>
+ * <p>
+ * <b>Règles métier importantes :</b>
+ * </p>
  * <ul>
- *   <li>Une commande doit contenir au moins un article</li>
- *   <li>L'utilisateur doit exister dans le service User</li>
- *   <li>Tous les produits doivent être en stock suffisant</li>
- *   <li>Les commandes DELIVERED ou CANCELLED ne peuvent plus être modifiées</li>
+ * <li>Une commande doit contenir au moins un article</li>
+ * <li>L'utilisateur doit exister dans le service User</li>
+ * <li>Tous les produits doivent être en stock suffisant</li>
+ * <li>Les commandes DELIVERED ou CANCELLED ne peuvent plus être modifiées</li>
  * </ul>
  * 
- * <p><b>Métriques Prometheus :</b></p>
+ * <p>
+ * <b>Métriques Prometheus :</b>
+ * </p>
  * <ul>
- *   <li>orders.created.total - Compteur des commandes créées</li>
- *   <li>orders.cancelled.total - Compteur des commandes annulées</li>
+ * <li>orders.created.total - Compteur des commandes créées</li>
+ * <li>orders.cancelled.total - Compteur des commandes annulées</li>
  * </ul>
  * 
  * @author E-commerce Team
@@ -74,24 +88,24 @@ public class OrderService {
     private final Counter ordersCreatedCounter;
     private final Counter ordersCancelledCounter;
 
-            public OrderService(OrderRepository orderRepository, 
-                       OrderItemRepository orderItemRepository,
-                       OrderMapper orderMapper,
-                       IUserClient userClient, 
-                       IProductClient productClient,
-                       MeterRegistry meterRegistry) {
-            this.orderRepository = orderRepository;
-            this.orderItemRepository = orderItemRepository;
-            this.orderMapper = orderMapper;
-            this.userClient = userClient;
-            this.productClient = productClient;
-            this.ordersCreatedCounter = Counter.builder("orders.created.total")
+    public OrderService(OrderRepository orderRepository,
+            OrderItemRepository orderItemRepository,
+            OrderMapper orderMapper,
+            IUserClient userClient,
+            IProductClient productClient,
+            MeterRegistry meterRegistry) {
+        this.orderRepository = orderRepository;
+        this.orderItemRepository = orderItemRepository;
+        this.orderMapper = orderMapper;
+        this.userClient = userClient;
+        this.productClient = productClient;
+        this.ordersCreatedCounter = Counter.builder("orders.created.total")
                 .description("Nombre total de commandes créées")
                 .register(meterRegistry);
-            this.ordersCancelledCounter = Counter.builder("orders.cancelled.total")
+        this.ordersCancelledCounter = Counter.builder("orders.cancelled.total")
                 .description("Nombre total de commandes annulées")
                 .register(meterRegistry);
-            }
+    }
 
     public List<OrderResponseDTO> getAllOrders() {
         log.info("Récupération de toutes les commandes");
@@ -124,9 +138,12 @@ public class OrderService {
     public OrderResponseDTO createOrder(OrderRequestDTO requestDTO) {
         log.info("Création d'une nouvelle commande pour l'utilisateur: {}", requestDTO.getUserId());
 
+        String jwtToken = getJwtFromRequest();
+
         // Vérifier que l'utilisateur existe
         UserDTO user = userClient.getUserById(requestDTO.getUserId())
-                .orElseThrow(() -> new BusinessException("Utilisateur avec l'id " + requestDTO.getUserId() + " n'existe pas"));
+                .orElseThrow(() -> new BusinessException(
+                        "Utilisateur avec l'id " + requestDTO.getUserId() + " n'existe pas"));
         log.debug("Utilisateur vérifié: {} {}", user.getFirstName(), user.getLastName());
 
         // Créer la commande
@@ -140,8 +157,9 @@ public class OrderService {
         // Ajouter les items et vérifier le stock
         for (OrderItemRequestDTO itemDTO : requestDTO.getItems()) {
             // Vérifier que le produit existe et a du stock
-            ProductDTO product = productClient.getProductById(itemDTO.getProductId())
-                    .orElseThrow(() -> new BusinessException("Produit avec l'id " + itemDTO.getProductId() + " n'existe pas"));
+            ProductDTO product = productClient.getProductById(itemDTO.getProductId(), jwtToken)
+                    .orElseThrow(() -> new BusinessException(
+                            "Produit avec l'id " + itemDTO.getProductId() + " n'existe pas"));
 
             if (product.getStock() < itemDTO.getQuantity()) {
                 throw new InsufficientStockException(itemDTO.getProductId(), itemDTO.getQuantity(), product.getStock());
@@ -159,8 +177,8 @@ public class OrderService {
 
             // Mettre à jour le stock
             int newStock = product.getStock() - itemDTO.getQuantity();
-            productClient.updateStock(itemDTO.getProductId(), newStock);
-            log.debug("Stock mis à jour pour le produit {}: {} -> {}", 
+            productClient.updateStock(itemDTO.getProductId(), newStock, jwtToken);
+            log.debug("Stock mis à jour pour le produit {}: {} -> {}",
                     itemDTO.getProductId(), product.getStock(), newStock);
         }
 
@@ -177,6 +195,12 @@ public class OrderService {
         return orderMapper.toResponseDTO(savedOrder);
     }
 
+    /**
+     * Met à jour le statut d'une commande.
+     * @param id Identifiant de la commande à mettre à jour
+     * @param statusDTO DTO contenant le nouveau statut
+     * @return DTO de la commande mise à jour
+     */
     public OrderResponseDTO updateOrderStatus(Long id, StatusUpdateDTO statusDTO) {
         log.info("Mise à jour du statut de la commande {}: {}", id, statusDTO.getStatus());
 
@@ -202,6 +226,11 @@ public class OrderService {
         return orderMapper.toResponseDTO(updatedOrder);
     }
 
+    /**
+     * Supprime une commande par son identifiant.
+     * @param id Identifiant de la commande à supprimer
+     * @throws ResourceNotFoundException si la commande n'existe pas
+     */
     public void deleteOrder(Long id) {
         log.info("Suppression de la commande: {}", id);
 
@@ -217,6 +246,11 @@ public class OrderService {
         log.info("Commande {} supprimée avec succès", id);
     }
 
+    /**
+     * Calcule le total des ventes pour une date donnée.
+     * @param date la date pour laquelle calculer le total des ventes
+     * @return le montant total des ventes pour la date spécifiée
+     */
     public BigDecimal getDailyTotal(LocalDate date) {
         log.info("Calcul du total des ventes pour le: {}", date);
         LocalDateTime startOfDay = date.atStartOfDay();
@@ -240,22 +274,42 @@ public class OrderService {
         }
     }
 
+    /**
+     * Restaure le stock des produits d'une commande annulée.
+     * @param order la commande dont le stock doit être restauré
+     */
     private void restoreStock(Order order) {
+        String jwtToken = getJwtFromRequest();
         log.info("Restauration du stock pour la commande: {}", order.getId());
         for (OrderItem item : order.getItems()) {
             try {
-                Optional<ProductDTO> productOpt = productClient.getProductById(item.getProductId());
+                Optional<ProductDTO> productOpt = productClient.getProductById(item.getProductId(), jwtToken);
                 if (productOpt.isPresent()) {
                     ProductDTO product = productOpt.get();
                     int newStock = product.getStock() + item.getQuantity();
-                    productClient.updateStock(item.getProductId(), newStock);
-                    log.debug("Stock restauré pour le produit {}: {} -> {}", 
+                    productClient.updateStock(item.getProductId(), newStock, jwtToken);
+                    log.debug("Stock restauré pour le produit {}: {} -> {}",
                             item.getProductId(), product.getStock(), newStock);
                 }
             } catch (Exception e) {
-                log.error("Erreur lors de la restauration du stock pour le produit {}: {}", 
+                log.error("Erreur lors de la restauration du stock pour le produit {}: {}",
                         item.getProductId(), e.getMessage());
             }
         }
+    }
+
+    /**
+     * Récupère le token JWT de la requête HTTP courante.
+     */
+    public String getJwtFromRequest() {
+        ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (attrs == null)
+            return null;
+        HttpServletRequest request = attrs.getRequest();
+        String header = request.getHeader("Authorization");
+        if (header != null && header.startsWith("Bearer ")) {
+            return header.substring(7);
+        }
+        return null;
     }
 }

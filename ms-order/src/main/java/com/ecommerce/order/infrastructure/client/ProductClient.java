@@ -13,10 +13,13 @@ import java.util.Optional;
 
 /**
  * Client HTTP pour la communication avec le microservice Product (ms-product).
- * 
+ *
  * <p>Ce client utilise WebClient (Spring WebFlux) pour effectuer des appels REST
  * synchrones vers le service Product sur le port 8082.</p>
- * 
+ *
+ * <p>Ce client accepte maintenant un token JWT à passer dans l'en-tête Authorization
+ * pour tous les appels authentifiés.</p>
+ *
  * <p><b>Fonctionnalités :</b></p>
  * <ul>
  *   <li>Récupération d'un produit par son ID</li>
@@ -24,15 +27,15 @@ import java.util.Optional;
  *   <li>Vérification de la disponibilité du service (health check)</li>
  *   <li>Gestion des timeouts et des erreurs de connexion</li>
  * </ul>
- * 
+ *
  * <p><b>Configuration :</b></p>
  * <ul>
  *   <li>services.product.url - URL de base du service Product</li>
  *   <li>services.product.timeout - Timeout en secondes (défaut: 5)</li>
  * </ul>
- * 
+ *
  * @author E-commerce Team
- * @version 1.0
+ * @version 1.1
  * @since 2024-12
  * @see ProductDTO
  */
@@ -52,17 +55,26 @@ public class ProductClient implements IProductClient {
         this.timeout = Duration.ofSeconds(timeoutSeconds);
     }
 
-    public Optional<ProductDTO> getProductById(Long productId) {
+    /**
+     * Récupère un produit par son identifiant.
+     *
+     * @param productId Identifiant du produit
+     * @param jwtToken  Token JWT à passer dans l'appel HTTP
+     * @return Optional contenant le produit si trouvé
+     */
+    @Override
+    public Optional<ProductDTO> getProductById(Long productId, String jwtToken) {
         log.info("Appel au service Product pour récupérer le produit {}", productId);
-        
+
         try {
             ProductDTO product = webClient.get()
                     .uri("/api/v1/products/{id}", productId)
+                    .header("Authorization", "Bearer " + jwtToken)
                     .retrieve()
                     .bodyToMono(ProductDTO.class)
                     .timeout(timeout)
                     .block();
-            
+
             return Optional.ofNullable(product);
         } catch (WebClientResponseException.NotFound e) {
             log.warn("Produit {} non trouvé", productId);
@@ -73,18 +85,28 @@ public class ProductClient implements IProductClient {
         }
     }
 
-    public boolean updateStock(Long productId, Integer newStock) {
+    /**
+     * Met à jour le stock d'un produit.
+     *
+     * @param productId Identifiant du produit
+     * @param newStock  Nouvelle quantité de stock
+     * @param jwtToken  Token JWT à passer dans l'appel HTTP
+     * @return true si la mise à jour a réussi
+     */
+    @Override
+    public boolean updateStock(Long productId, Integer newStock, String jwtToken) {
         log.info("Mise à jour du stock du produit {} à {}", productId, newStock);
-        
+
         try {
             webClient.patch()
                     .uri("/api/v1/products/{id}/stock", productId)
+                    .header("Authorization", "Bearer " + jwtToken)
                     .bodyValue(java.util.Map.of("quantity", newStock))
                     .retrieve()
                     .bodyToMono(ProductDTO.class)
                     .timeout(timeout)
                     .block();
-            
+
             return true;
         } catch (Exception e) {
             log.error("Erreur lors de la mise à jour du stock: {}", e.getMessage());
@@ -92,6 +114,12 @@ public class ProductClient implements IProductClient {
         }
     }
 
+    /**
+     * Vérifie si le service Product est disponible.
+     *
+     * @return true si le service est disponible
+     */
+    @Override
     public boolean isServiceAvailable() {
         try {
             webClient.get()

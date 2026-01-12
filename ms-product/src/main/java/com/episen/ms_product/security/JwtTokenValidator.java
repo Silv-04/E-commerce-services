@@ -80,9 +80,9 @@ public class JwtTokenValidator {
             }
 
             User user = new User();
-            user.setUserId(claimsSet.getLongClaim("UserId"));
-            user.setEmail(claimsSet.getStringClaim("Email"));
-            user.setRoles(claimsSet.getStringListClaim("Roles"));
+            user.setUserId(claimsSet.getLongClaim("userId"));
+            user.setEmail(claimsSet.getStringClaim("email"));
+            user.setRoles(claimsSet.getStringListClaim("roles"));
             return user;
         } catch (JwtExpiredException e) {
             throw e;

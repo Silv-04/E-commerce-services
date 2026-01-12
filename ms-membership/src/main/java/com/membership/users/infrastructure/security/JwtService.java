@@ -29,6 +29,8 @@ public class JwtService {
 
         return Jwts.builder()
                 .setSubject(String.valueOf(user.getId()))
+                .setIssuer("episen-e-commerce")
+                .setAudience("web")
                 .setIssuedAt(Date.from(now))
                 .setExpiration(Date.from(now.plusSeconds(expirationSeconds)))
                 .claim("userId", user.getId())

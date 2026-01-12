@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: com.ecommerce.order.application.service.OrderServiceTest
--------------------------------------------------------------------------------
-Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.015 s -- in com.ecommerce.order.application.service.OrderServiceTest

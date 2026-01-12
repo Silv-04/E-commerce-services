@@ -21,7 +21,6 @@ public class JwtTokenValidator {
     @PostConstruct
     public void init() {
         try {
-            // Récupère la clé publique depuis InfraSetting
             jwsVerifier = new RSASSAVerifier((java.security.interfaces.RSAPublicKey) InfraSetting.loadPublicKey());
         } catch (Exception e) {
             throw new RuntimeException("Impossible d'initialiser le JwtTokenValidator", e);
@@ -71,9 +70,9 @@ public class JwtTokenValidator {
 
             User user = new User();
             user.setUsername(claims.getSubject());
-            user.setId(claims.getLongClaim("UserId"));
-            user.setEmail(claims.getStringClaim("Email"));
-            user.setRoles(claims.getStringListClaim("Roles"));
+            user.setId(claims.getLongClaim("userId"));
+            user.setEmail(claims.getStringClaim("email"));
+            user.setRoles(claims.getStringListClaim("roles"));
 
             return user;
         } catch (TokenExpiredException e) {

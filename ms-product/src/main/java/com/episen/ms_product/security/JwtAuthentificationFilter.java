@@ -32,45 +32,43 @@ public class JwtAuthentificationFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Filtre les requêtes HTTP pour valider le token JWT dans l'en-tête Authorization.
-     * @param request  La requête HTTP entrante.
-     * @param response La réponse HTTP sortante.
-     * @param filterChain La chaîne de filtres.
-     * @throws IOException En cas d'erreur d'entrée/sortie.
-     * @throws ServletException En cas d'erreur de servlet.
+     * Filtre les requêtes HTTP pour authentification JWT
+     * * @param request requête HTTP
+     * * @param response réponse HTTP
+     * * @param filterChain chaîne de filtres
+     * * @throws IOException
+     * * @throws ServletException
      */
     @Override
-    protected void doFilterInternal(@NonNull HttpServletRequest request,
+    protected void doFilterInternal(
+            @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain) throws IOException, ServletException {
-
-        if (request.getRequestURI().startsWith("/actuator") ||
-            request.getRequestURI().startsWith("/v3/api-docs")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+            @NonNull FilterChain filterChain)
+            throws IOException, ServletException {
 
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         if (header == null || !header.startsWith("Bearer ")) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            System.out.println("Missing or invalid Authorization header");
             return;
         }
 
         String token = header.substring(7);
-        System.out.println("Token received: " + token);
 
         try {
             User user = jwtTokenValidator.transform(token);
-            System.out.println("Authenticated user: " + user.toString());
+
             List<GrantedAuthority> authorities = user.getRoles().stream()
                     .map(role -> (GrantedAuthority) () -> role)
                     .toList();
+
             Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    user.getUserId(), null, authorities);
+                    user.getUserId(),
+                    null,
+                    authorities);
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
+
         } catch (JwtExpiredException e) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             return;
@@ -78,6 +76,14 @@ public class JwtAuthentificationFilter extends OncePerRequestFilter {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
+
         filterChain.doFilter(request, response);
     }
+
+    @Override
+    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+        return path.startsWith("/actuator") || path.startsWith("/v3/api-docs");
+    }
+
 }

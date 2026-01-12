@@ -1,24 +1,19 @@
 package com.episen.ms_product.settings;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.security.KeyFactory;
+import java.io.FileInputStream;
 import java.security.PublicKey;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 
+/**
+ * Paramètres d'infrastructure
+ */
 public class InfraSetting {
-
     public static PublicKey loadPublicKey() {
-        try {
-            String key = Files.readString(Path.of("/app/keys/public_key.pem"))
-                    .replace("-----BEGIN PUBLIC KEY-----", "")
-                    .replace("-----END PUBLIC KEY-----", "")
-                    .replaceAll("\\s+", "");
-
-            byte[] decoded = Base64.getDecoder().decode(key);
-            X509EncodedKeySpec spec = new X509EncodedKeySpec(decoded);
-            return KeyFactory.getInstance("RSA").generatePublic(spec);
+        try (FileInputStream fis = new FileInputStream("/app/keys/public_cert.pem")) {
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            X509Certificate cert = (X509Certificate) cf.generateCertificate(fis);
+            return cert.getPublicKey();
         } catch (Exception e) {
             throw new RuntimeException("Impossible de charger la clé publique", e);
         }
