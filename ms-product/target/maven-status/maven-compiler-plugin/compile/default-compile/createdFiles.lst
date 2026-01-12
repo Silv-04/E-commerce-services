@@ -10,6 +10,7 @@ com\episen\ms_product\infrastructure\exception\ErrorResponse.class
 com\episen\ms_product\security\JwtTokenValidator.class
 com\episen\ms_product\security\SecurityConfig.class
 com\episen\ms_product\security\JwtAuthentificationFilter.class
+com\episen\ms_product\security\JwtExpiredException.class
 com\episen\ms_product\domain\entity\Product.class
 com\episen\ms_product\application\service\ProductService.class
 com\episen\ms_product\application\dto\ProductResponseDTO.class

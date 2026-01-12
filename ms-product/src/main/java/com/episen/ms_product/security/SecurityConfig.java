@@ -17,6 +17,12 @@ public class SecurityConfig {
         this.jwtAuthentificationFilter = jwtAuthentificationFilter;
     }
 
+    /**
+     * Configure la chaîne de filtres de sécurité.
+     * @param httpSecurity L'objet HttpSecurity à configurer.
+     * @return La chaîne de filtres de sécurité configurée.
+     * @throws Exception En cas d'erreur de configuration.
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity

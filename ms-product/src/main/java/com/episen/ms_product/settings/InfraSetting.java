@@ -7,6 +7,9 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 
+/**
+ * Classe de configuration des paramètres d'infrastructure.
+ */
 public class InfraSetting {
     public static KeyPair keyPairLoader() {
         try (FileInputStream is = new FileInputStream("/app/keys/server.p12")){
