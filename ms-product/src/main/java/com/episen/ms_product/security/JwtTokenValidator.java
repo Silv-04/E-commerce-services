@@ -26,7 +26,7 @@ public class JwtTokenValidator {
      */
     @PostConstruct
     public void init() {
-        jwsVerifier = new RSASSAVerifier((RSAPublicKey) InfraSetting.keyPairLoader().getPublic());
+        jwsVerifier = new RSASSAVerifier((RSAPublicKey) InfraSetting.loadPublicKey());
     }
 
     /**

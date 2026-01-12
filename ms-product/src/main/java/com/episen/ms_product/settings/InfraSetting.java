@@ -1,28 +1,26 @@
 package com.episen.ms_product.settings;
 
-import java.io.FileInputStream;
-import java.security.Key;
-import java.security.KeyPair;
-import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.cert.Certificate;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.KeyFactory;
+import java.security.PublicKey;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 
-/**
- * Classe de configuration des paramètres d'infrastructure.
- */
 public class InfraSetting {
-    public static KeyPair keyPairLoader() {
-        try (FileInputStream is = new FileInputStream("/app/keys/server.p12")){
-            KeyStore keystore = KeyStore.getInstance("PKCS12");
-            keystore.load(is, "jil".toCharArray());
 
-            Key key = keystore.getKey("jil", "jil".toCharArray());
-            Certificate certificate = keystore.getCertificate("jil");
+    public static PublicKey loadPublicKey() {
+        try {
+            String key = Files.readString(Path.of("/app/keys/public_key.pem"))
+                    .replace("-----BEGIN PUBLIC KEY-----", "")
+                    .replace("-----END PUBLIC KEY-----", "")
+                    .replaceAll("\\s+", "");
 
-            return new KeyPair(certificate.getPublicKey(), (PrivateKey) key);
-        }
-        catch (Exception e) {
-            throw new RuntimeException(e);
+            byte[] decoded = Base64.getDecoder().decode(key);
+            X509EncodedKeySpec spec = new X509EncodedKeySpec(decoded);
+            return KeyFactory.getInstance("RSA").generatePublic(spec);
+        } catch (Exception e) {
+            throw new RuntimeException("Impossible de charger la clé publique", e);
         }
     }
 }

@@ -114,7 +114,7 @@ info:
     version: ${spring.application.version}
     encoding: UTF-8
     java:
-      version: 21.0.5
+      version: 21.0.9
   contact:
     email: support@episen.com
     team: Architecture Team
