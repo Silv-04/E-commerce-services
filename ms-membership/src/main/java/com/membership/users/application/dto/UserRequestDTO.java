@@ -33,4 +33,14 @@ public class UserRequestDTO {
     @NotBlank(message = "L'email ne peut pas être vide")
     @Email(message = "L'email doit être valide")
     private String email;
+
+    @NotBlank(message = "Le mot de passe ne peut pas être vide")
+    @Size(min = 8, message = "Le mot de passe doit contenir au moins 8 caractères")
+    private String password;
+
+    /**
+     * Liste des rôles séparés par des virgules (ex: ROLE_USER,ROLE_ADMIN)
+     */
+    @Builder.Default
+    private String roles = "ROLE_USER";
 }

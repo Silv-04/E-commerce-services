@@ -19,11 +19,13 @@ public class UserMapper {
     /**
      * Convertit un UserRequestDTO en entité User
      */
-    public User toEntity(UserRequestDTO dto) {
+    public User toEntity(UserRequestDTO dto, String passwordHash) {
         return User.builder()
                 .firstName(dto.getFirstName())
                 .lastName(dto.getLastName())
                 .email(dto.getEmail())
+                .passwordHash(passwordHash)
+                .roles(resolveRoles(dto.getRoles()))
                 .active(true)
                 .build();
     }
@@ -38,6 +40,7 @@ public class UserMapper {
                 .lastName(user.getLastName())
                 .email(user.getEmail())
                 .active(user.getActive())
+                .roles(user.getRoles())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .build();
@@ -50,5 +53,13 @@ public class UserMapper {
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
         user.setEmail(dto.getEmail());
+        user.setRoles(resolveRoles(dto.getRoles()));
+    }
+
+    private String resolveRoles(String roles) {
+        if (roles == null || roles.isBlank()) {
+            return "ROLE_USER";
+        }
+        return roles.replaceAll("\\s+", "");
     }
 }

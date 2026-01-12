@@ -6,60 +6,82 @@ CREATE TABLE IF NOT EXISTS users (
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    roles VARCHAR(255) NOT NULL DEFAULT 'ROLE_USER',
     active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 INSERT INTO
-    users (first_name, last_name, email)
+    users (first_name, last_name, email, password_hash, roles)
 VALUES (
         'Alice',
         'Martin',
-        'alice.martin@example.com'
+        'alice.martin@example.com',
+        '$2a$10$bvwSRw6ipdk6RStZpwc1VuV9G0CijFcAxvlOKkR4ooHhW6795JhC6',
+        'ROLE_USER'
     ),
     (
         'Bob',
         'Dupont',
-        'bob.dupont@example.com'
+        'bob.dupont@example.com',
+        '$2a$10$bvwSRw6ipdk6RStZpwc1VuV9G0CijFcAxvlOKkR4ooHhW6795JhC6',
+        'ROLE_USER,ROLE_ADMIN'
     ),
     (
         'Caroline',
         'Leclerc',
-        'caroline.leclerc@example.com'
+        'caroline.leclerc@example.com',
+        '$2a$10$bvwSRw6ipdk6RStZpwc1VuV9G0CijFcAxvlOKkR4ooHhW6795JhC6',
+        'ROLE_USER'
     ),
     (
         'David',
         'Moreau',
-        'david.moreau@example.com'
+        'david.moreau@example.com',
+        '$2a$10$bvwSRw6ipdk6RStZpwc1VuV9G0CijFcAxvlOKkR4ooHhW6795JhC6',
+        'ROLE_USER'
     ),
     (
         'Elodie',
         'Girard',
-        'elodie.girard@example.com'
+        'elodie.girard@example.com',
+        '$2a$10$bvwSRw6ipdk6RStZpwc1VuV9G0CijFcAxvlOKkR4ooHhW6795JhC6',
+        'ROLE_USER'
     ),
     (
         'François',
         'Petit',
-        'francois.petit@example.com'
+        'francois.petit@example.com',
+        '$2a$10$bvwSRw6ipdk6RStZpwc1VuV9G0CijFcAxvlOKkR4ooHhW6795JhC6',
+        'ROLE_USER'
     ),
     (
         'Gabriel',
         'Rousseau',
-        'gabriel.rousseau@example.com'
+        'gabriel.rousseau@example.com',
+        '$2a$10$bvwSRw6ipdk6RStZpwc1VuV9G0CijFcAxvlOKkR4ooHhW6795JhC6',
+        'ROLE_USER'
     ),
     (
         'Hélène',
         'Faure',
-        'helene.faure@example.com'
+        'helene.faure@example.com',
+        '$2a$10$bvwSRw6ipdk6RStZpwc1VuV9G0CijFcAxvlOKkR4ooHhW6795JhC6',
+        'ROLE_USER'
     ),
     (
         'Isabelle',
         'Blanc',
-        'isabelle.blanc@example.com'
+        'isabelle.blanc@example.com',
+        '$2a$10$bvwSRw6ipdk6RStZpwc1VuV9G0CijFcAxvlOKkR4ooHhW6795JhC6',
+        'ROLE_USER'
     ),
     (
         'Julien',
         'Lemoine',
-        'julien.lemoine@example.com'
+        'julien.lemoine@example.com',
+        '$2a$10$bvwSRw6ipdk6RStZpwc1VuV9G0CijFcAxvlOKkR4ooHhW6795JhC6',
+        'ROLE_USER'
     );

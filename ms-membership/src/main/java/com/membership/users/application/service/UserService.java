@@ -14,6 +14,7 @@ import com.membership.users.domain.entity.User;
 import com.membership.users.domain.repository.UserRepository;
 import com.membership.users.infrastructure.exception.ResourceAlreadyExistsException;
 import com.membership.users.infrastructure.exception.ResourceNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,6 +37,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final MeterRegistry meterRegistry;
+        private final PasswordEncoder passwordEncoder;
 
     /**
      * Récupère tous les utilisateurs
@@ -80,7 +82,8 @@ public class UserService {
             throw new ResourceAlreadyExistsException("User", "email", userRequestDTO.getEmail());
         }
         
-        User user = userMapper.toEntity(userRequestDTO);
+        String passwordHash = passwordEncoder.encode(userRequestDTO.getPassword());
+        User user = userMapper.toEntity(userRequestDTO, passwordHash);
         User savedUser = userRepository.save(user);
         
         // Métrique personnalisée
@@ -113,6 +116,7 @@ public class UserService {
         }
         
         userMapper.updateEntityFromDto(userRequestDTO, user);
+                user.setPasswordHash(passwordEncoder.encode(userRequestDTO.getPassword()));
         User updatedUser = userRepository.save(user);
         
         // Métrique personnalisée
