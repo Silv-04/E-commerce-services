@@ -4,40 +4,7 @@
 
 La plateforme e-commerce implémente une authentification stateless basée sur les **JWT (JSON Web Tokens)** signés avec un chiffrement **RSA asymétrique (2048 bits)**.
 
-### Flux de sécurité
-
-```
-┌─────────────┐
-│   Client    │
-└──────┬──────┘
-       │
-       │ 1. POST /api/v1/auth/login
-       │    (email + password)
-       ↓
-┌────────────────────┐        RSA Private Key
-│ Membership Service │ ─────────────────────→ Signe JWT
-└────────┬───────────┘
-         │
-         │ 2. Retourne JWT signé
-         │    { token: "eyJhbGc...", expiresIn: 3600 }
-         ↓
-┌─────────────────────────┐
-│ Client stocke le token  │
-└──────────┬──────────────┘
-           │
-           │ 3. Authorization: Bearer <token>
-           ├────────────────→ Product Service    (avec filtre JWT)
-           ├────────────────→ Order Service      (avec filtre JWT)
-           └────────────────→ Membership Service (avec filtre JWT)
-                              │
-                              ↓
-                        RSA Public Key
-                        Vérifie signature
-                        Extrait claims
-                        Authentifie utilisateur
-```
-
----
+**Diagramme d'architecture:** Consultez [architecture/DIAGRAMME JWT.png](architecture/DIAGRAMME%20JWT.png) pour une vue visuelle de l'architecture d'authentification.
 
 ## Architecture de sécurité
 
@@ -45,18 +12,25 @@ La plateforme e-commerce implémente une authentification stateless basée sur l
 
 **Endpoint:** `POST /api/v1/auth/login`
 
-**Requête:**
+**Requête (Curl):**
+```bash
+curl -X POST http://localhost:8081/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"alice.martin@example.com","password":"password"}'
+```
+
+**Requête (JSON):**
 ```json
 {
-  "email": "user@example.com",
-  "password": "password123"
+  "email": "alice.martin@example.com",
+  "password": "password"
 }
 ```
 
 **Réponse (200 OK):**
 ```json
 {
-  "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMSIsImlzcyI6ImVwaXNlbi1lLWNvbW1lcmNlIiwiYXVkIjpbIndlYiJdLCJVc2VySWQiOjEsIkVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsIlJvbGVzIjpbIlVTRVIiXSwiZXhwIjoxNzA0MTAwMDAwfQ.signature",
+  "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbGljZS5tYXJ0aW5AZXhhbXBsZS5jb20iLCJpc3MiOiJlcGlzZW4tZS1jb21tZXJjZSIsImF1ZCI6WyJ3ZWIiXSwiVXNlcklkIjoxLCJFbWFpbCI6ImFsaWNlLm1hcnRpbkBleGFtcGxlLmNvbSIsIlJvbGVzIjpbIlVTRVIiXSwiZXhwIjoxNzA0MTAwMDAwfQ.signature",
   "expiresIn": 3600
 }
 ```
@@ -74,13 +48,13 @@ La plateforme e-commerce implémente une authentification stateless basée sur l
 **Payload (Claims):**
 ```json
 {
-  "sub": "username",                    // Subject (utilisateur)
-  "iss": "episen-e-commerce",          // Issuer
-  "aud": ["web"],                      // Audience
-  "UserId": 1,                         // ID utilisateur
-  "Email": "user@example.com",         // Email
-  "Roles": ["USER", "ADMIN"],          // Rôles
-  "exp": 1704100000                    // Expiration (Unix timestamp)
+  "sub": "alice.martin@example.com",    // Subject (email de l'utilisateur)
+  "iss": "episen-e-commerce",           // Issuer
+  "aud": ["web"],                       // Audience
+  "UserId": 1,                          // ID utilisateur
+  "Email": "alice.martin@example.com",  // Email
+  "Roles": ["USER"],                    // Rôles
+  "exp": 1704100000                     // Expiration (Unix timestamp)
 }
 ```
 
@@ -304,6 +278,18 @@ GET    /v3/api-docs/**                             (OpenAPI)
 GET    /swagger-ui.html                            (Swagger UI)
 ```
 
+**Exemple d'appel public (Membership - Login):**
+```bash
+curl -X POST http://localhost:8081/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"alice.martin@example.com","password":"password"}'
+```
+
+**Exemple - Vérifier la santé d'un service:**
+```bash
+curl http://localhost:8082/actuator/health
+```
+
 ### Protégés (authentification requise)
 
 ```
@@ -312,6 +298,18 @@ POST   /products                                   (Product)
 GET    /orders                                     (Order)
 POST   /orders                                     (Order)
 ... tous les autres endpoints
+```
+
+**Exemple d'appel protégé (avec JWT):**
+```bash
+# 1. Récupérer le token
+TOKEN=$(curl -s -X POST http://localhost:8081/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"alice.martin@example.com","password":"password"}' | grep -o '"token":"[^"]*' | cut -d'"' -f4)
+
+# 2. Utiliser le token pour accéder aux ressources protégées
+curl -X GET http://localhost:8082/products \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
 ---
@@ -340,7 +338,7 @@ POST   /orders                                     (Order)
 
 ## Sécurité - Best Practices
 
-✅ **Implémenté**
+**Implémenté**
 - RSA asymétrique (clé privée secrète)
 - Stateless (pas de session serveur)
 - JWT signé (non juste encodé)
@@ -348,7 +346,7 @@ POST   /orders                                     (Order)
 - Validation complète des claims
 - Endpoints `/actuator` exemptés
 
-⚠️ **Recommandations pour la production**
+**Recommandations pour la production**
 - HTTPS obligatoire
 - Refresh tokens pour renouvellement sans re-login
 - Stockage des clés dans un vault (HashiCorp Vault, AWS Secrets Manager)
@@ -361,17 +359,38 @@ POST   /orders                                     (Order)
 
 ## Dépannage
 
+### Erreur: "401 Unauthorized"
+**Cause:** Header `Authorization` absent ou mal formé
+**Solution:** Envoyer `Authorization: Bearer <token>` avec un token valide
+```bash
+# Correct
+curl -X GET http://localhost:8082/products \
+  -H "Authorization: Bearer eyJhbGciOiJSUzI1NiI..."
+
+# Erreur - pas de token
+curl -X GET http://localhost:8082/products
+
+# Erreur - token expiré
+# Refaire un login pour obtenir un nouveau token
+```
+
 ### Erreur: "Token cannot be verified"
 **Cause:** Clé publique invalide ou token signé avec une autre clé
 **Solution:** Vérifier que les clés RSA sont identiques sur tous les services
+```bash
+# Vérifier la clé publique dans le certificat
+openssl x509 -in keys/certificate.crt -text -noout
+```
 
 ### Erreur: "Invalid Token - Token expired"
 **Cause:** Token expiré (plus de 1 heure)
 **Solution:** Client doit refaire un login pour obtenir un nouveau token
-
-### Erreur: "401 Unauthorized"
-**Cause:** Header `Authorization` absent ou mal formé
-**Solution:** Envoyer `Authorization: Bearer <token>`
+```bash
+# Récupérer un nouveau token
+curl -X POST http://localhost:8081/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"alice.martin@example.com","password":"password"}'
+```
 
 ### Service Product/Order retourne 401 en interne
 **Cause:** Token non propagé lors de l'appel inter-service
@@ -379,7 +398,65 @@ POST   /orders                                     (Order)
 
 ---
 
-## Fichiers concernés
+## Guide de test
+
+### 1. Test du login (Membership Service)
+
+**Port:** `8081`
+
+```bash
+# Requête
+curl -X POST http://localhost:8081/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"alice.martin@example.com","password":"password"}'
+
+# Réponse attendue (200 OK)
+{
+  "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expiresIn": 3600
+}
+```
+
+### 2. Test d'accès protégé (Product Service)
+
+**Port:** `8082`
+
+```bash
+# Étape 1: Récupérer le token
+curl -s -X POST http://localhost:8081/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"alice.martin@example.com","password":"password"}' \
+  | jq -r '.token' > token.txt
+
+# Étape 2: Utiliser le token
+TOKEN=$(cat token.txt)
+curl -X GET http://localhost:8082/products \
+  -H "Authorization: Bearer $TOKEN"
+
+# Réponse attendue (200 OK avec la liste des produits)
+```
+
+### 3. Test sans token (doit échouer)
+
+```bash
+# Sans token → 401 Unauthorized
+curl -X GET http://localhost:8082/products
+
+# Réponse attendue (401 Unauthorized)
+```
+
+### 4. Santé des services
+
+```bash
+# Membership (accessible sans token)
+curl http://localhost:8081/actuator/health
+
+# Product (accessible sans token)
+curl http://localhost:8082/actuator/health
+
+# Order (accessible sans token)
+curl http://localhost:8083/actuator/health
+```
 
 ```
 ms-membership/
